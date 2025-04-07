@@ -14,6 +14,7 @@ export const fetchData = async (endpoint: string): Promise<any> => {
 };
 
 export const postData = async (endpoint: string, data: any): Promise<any> => {
+  console.log(`${BASE_URL}/${endpoint}`);
   try {
     const response = await fetch(`${BASE_URL}/${endpoint}`, {
       method: "POST",
