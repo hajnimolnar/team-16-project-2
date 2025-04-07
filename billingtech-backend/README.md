@@ -3,8 +3,8 @@
 This is the backend prototype for the **Invoice Management Application** built during the 2025 EEP Cohort. It allows users to:
 
 - View invoices and line items
-- Submit freeform requests for line item changes or full refunds
-- Leverage GenAI (mocked) to interpret user text and structure it into actionable requests
+- Submit change requests for line items
+- Request full refunds for invoices
 
 ---
 
@@ -13,7 +13,7 @@ This is the backend prototype for the **Invoice Management Application** built d
 ### 1. Clone the repository
 
 ```bash
-git clone git@github.com:hajnimolnar/team-16-project-2.git
+git clone https://github.com/YOUR-ORG-HERE/billingtech-backend.git
 cd billingtech-backend
 ```
 
@@ -47,34 +47,32 @@ node app.js
 
 ## 🧪 API Endpoints
 
-| Method | Endpoint                                  | Description                     |
-|--------|-------------------------------------------|---------------------------------|
-| GET    | `/api/invoices`                           | Get all invoices                |
-| GET    | `/api/invoices/:id`                       | Get invoice with line items     |
-| POST   | `/api/requests`                           | Submit a freeform request       |
+| Method | Endpoint                                  | Description                        |
+|--------|-------------------------------------------|------------------------------------|
+| GET    | `/api/invoices`                           | Get all invoices                   |
+| GET    | `/api/invoices/:id`                       | Get invoice with line items        |
+| POST   | `/api/change_requests`                    | Submit a change request            |
+| POST   | `/api/refund_requests`                    | Submit a refund request            |
 
-### Example Request to `/api/requests`
+### Example Change Request
 
 ```json
 {
+  "line_item_id": 1,
   "user_id": 1,
-  "invoice_id": 1,
-  "description": "Please refund this invoice due to a double charge"
+  "request_description": "Update quantity to 2"
 }
 ```
 
-Mock GenAI will classify and route it to either `change_requests` or `refund_requests`.
+### Example Refund Request
 
----
-
-## 💡 GenAI Integration
-
-GenAI logic is mocked for prototyping purposes via `genai/mockGenAI.js`. It simulates how natural language input would be interpreted in a real AI-enabled system.
-
-To upgrade this later, you can:
-
-- Swap in OpenAI or other LLM API
-- Use local LLMs (Ollama, LM Studio)
+```json
+{
+  "invoice_id": 1,
+  "user_id": 1,
+  "request_description": "Requesting full refund for double billing"
+}
+```
 
 ---
 
@@ -90,9 +88,8 @@ billingtech-backend/
 │   └── invoices.db        # SQLite database
 ├── routes/
 │   ├── invoices.js        # Invoice endpoints
-│   └── requests.js        # GenAI-enabled request handler
-├── genai/
-│   └── mockGenAI.js       # Simulated AI logic
+│   ├── changeRequests.js  # Change request endpoint
+│   └── refundRequests.js  # Refund request endpoint
 ```
 
 ---
@@ -101,4 +98,10 @@ billingtech-backend/
 
 - [SQLite Viewer for VS Code](https://marketplace.visualstudio.com/items?itemName=alexcvzz.vscode-sqlite) — to inspect the database visually
 - [Postman](https://www.postman.com/) — to test the API endpoints
-- [Ollama](https://ollama.com/) (optional) — for local LLM experimentation
+
+---
+
+## 👥 Authors
+
+- Bertalan Kis
+- Team 16 @ 2025 EEP Cohort
