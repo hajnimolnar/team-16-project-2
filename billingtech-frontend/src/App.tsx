@@ -15,7 +15,7 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <h1>Welcome to BillingTech Frontend</h1>
+      <h1>Welcome to BillingTech</h1>
       <TableView data={data} columns={columns} />
     </div>
   );
