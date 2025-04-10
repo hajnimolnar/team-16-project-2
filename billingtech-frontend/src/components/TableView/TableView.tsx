@@ -42,7 +42,10 @@ const TableView: React.FC<TableViewProps> = ({ data, columns }) => {
   const [nestedData, setNestedData] = useState<{ [key: number]: any }>({});
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [selectedLineItem, setSelectedLineItem] = useState<any>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [changeRequestText, setChangeRequestText] = useState<string>("");
+  const [refundDialogOpen, setRefundDialogOpen] = useState<boolean>(false);
+  const [refundRequestText, setRefundRequestText] = useState<string>("");
 
   // Transform columns to GridColDef format
   const gridColumns: GridColDef[] = [
@@ -74,6 +77,31 @@ const TableView: React.FC<TableViewProps> = ({ data, columns }) => {
       headerName: column.header,
       flex: 1,
     })),
+    {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      width: 150,
+      renderCell: (params: GridRenderCellParams) => {
+        const isPaid = params.row.status === "Paid";
+        return (
+          isPaid && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() =>
+                handleOpenRefundDialog(
+                  params.row.invoice_id as number,
+                  params.row.user_id as number
+                )
+              }
+            >
+              Request Refund
+            </Button>
+          )
+        );
+      },
+    },
   ];
 
   // Transform data to GridRowsProp format
@@ -98,6 +126,37 @@ const TableView: React.FC<TableViewProps> = ({ data, columns }) => {
       } finally {
         setLoadingRow(null);
       }
+    }
+  };
+
+  const handleOpenRefundDialog = (invoice_id: number, user_id: number) => {
+    setSelectedInvoice({ invoice_id, user_id });
+    setRefundRequestText(""); // Clear any previous text
+    setRefundDialogOpen(true);
+  };
+
+  const handleCloseRefundDialog = () => {
+    setRefundDialogOpen(false);
+    setRefundRequestText("");
+    setSelectedInvoice(null);
+  };
+
+  const handleSubmitRefundRequest = async (
+    invoiceId: number,
+    userId: number
+  ) => {
+    try {
+      await postData("refund_requests", {
+        invoice_id: invoiceId,
+        user_id: userId, // Use user_id directly from the row data
+        request_description: refundRequestText, // Include description as the third parameter
+      });
+      alert(`Refund request for invoice ${invoiceId} submitted successfully!`);
+    } catch (error) {
+      console.error("Failed to submit refund request:", error);
+      alert("Failed to submit refund request.");
+    } finally {
+      handleCloseRefundDialog();
     }
   };
 
@@ -214,6 +273,36 @@ const TableView: React.FC<TableViewProps> = ({ data, columns }) => {
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button onClick={handleSubmitChangeRequest} variant="contained">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={refundDialogOpen} onClose={handleCloseRefundDialog}>
+        <DialogTitle>Request Refund</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Refund Request Description"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            value={refundRequestText}
+            onChange={(e) => setRefundRequestText(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseRefundDialog}>Cancel</Button>
+          <Button
+            onClick={() =>
+              handleSubmitRefundRequest(
+                selectedInvoice?.invoice_id,
+                selectedInvoice?.user_id
+              )
+            }
+            variant="contained"
+          >
             Submit
           </Button>
         </DialogActions>
